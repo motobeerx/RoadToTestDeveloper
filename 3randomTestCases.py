@@ -30,8 +30,7 @@ def randomeTestCases():
             res_path = os.path.split(path)
             res_path = os.path.join(res_path[0] + r'\res_' + res_path[1])
             with open(res_path, 'w') as f:
-                for x in random_cases_number:
-                    f.write(line_list[x])
+                [f.write(line_list[x]) for x in random_cases_number]
             return res_path
         except AssertionError:
             if not os.path.exists(path):
