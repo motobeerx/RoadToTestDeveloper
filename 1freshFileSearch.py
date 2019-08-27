@@ -9,8 +9,7 @@ def freashFileSearch():
             path = input()
             print(r"Enter file extension (for example .txt): ", end='')
             ext = input()
-            if not os.path.isdir(path):
-                raise FileExistsError
+            assert os.path.isdir(path)
             files = os.listdir(path)
             if ext[0] != '.':
                 ext = '.' + ext
@@ -22,14 +21,11 @@ def freashFileSearch():
             for i in range(len(files)):
                 print(files[i][0] + '  ||  ' + files[i][1])
             return
-        except FileExistsError:
-            print('\nThe given directory "' + path + '" does not exist.')
-            print('Would you like to try one more time? Y/N: ', end='')
-            cont_descis = input()
-            if cont_descis == 'N' or cont_descis == 'n':
-                return
         except AssertionError:
-            print('\nNo " *' + ext + ' " file has been found in the "' + path + '"')
+            if not os.path.isdir(path):
+                print('\nThe given directory "' + path + '" does not exist.')
+            if len(files) == 0:
+                print('\nNo " *' + ext + ' " file has been found in the "' + path + '"')
             print('Would you like to try one more time ? Y/N: ', end='')
             cont_descis = input()
             if cont_descis == 'N' or cont_descis == 'n':
