@@ -1,52 +1,39 @@
 import os
-import random
+from datetime import datetime
 
 
-def randomeTestCases():
+def freashFileSearch():
     while True:
         try:
-            print(r"Insert file's path (for example C:/User/Documents/test.txt): ", end='')
+            print(r"Enter folder's path (for example C:\User\Documents): ", end='')
             path = input()
-            print(r"Insert number of test cases: ", end='')
-            n = int(input())
-            line_list = []
-            random_cases_number = [0]
-            assert os.path.exists(path)
-            with open(path, 'r') as f:
-                f_content = f.readline()
-                while f_content != '':
-                    line_list.append(f_content)
-                    f_content = f.readline()
-                assert n <= len(line_list)
-                i = 1
-                while i < n + 1:
-                    random_cases_number.append(random.randint(1, len(line_list) - 1))
-                    if random_cases_number[i] in random_cases_number[:i]:
-                        random_cases_number.pop()
-                        i -= 1
-                    i += 1
-            with open(path, 'w') as f:
-                [f.write(line_list[i]) for i in range(len(line_list)) if i not in random_cases_number[1:]]
-            res_path = os.path.split(path)
-            res_path = os.path.join(res_path[0] + r'\res_' + res_path[1])
-            with open(res_path, 'w') as f:
-                [f.write(line_list[x]) for x in random_cases_number]
-            return res_path
+            print(r"Enter file extension (for example .txt): ", end='')
+            ext = input()
+            if not os.path.isdir(path):
+                raise FileExistsError
+            files = os.listdir(path)
+            if ext[0] != '.':
+                ext = '.' + ext
+            files = [[os.path.join(path, files[i]), os.path.getctime(os.path.join(path, files[i]))] for i in range(len(files)) if ext == os.path.splitext(files[i])[1]]
+            assert len(files) != 0
+            d = max(x[1] for x in files)
+            files = [[files[i][0], str(datetime.fromtimestamp(int(files[i][1])))] for i in range(len(files)) if d - files[i][1] <= 10]
+            files.sort(key=lambda item: item[1], reverse=True)
+            for i in range(len(files)):
+                print(files[i][0] + '  ||  ' + files[i][1])
+            return
+        except FileExistsError:
+            print('\nThe given directory "' + path + '" does not exist.')
+            print('Would you like to try one more time ? Y/N: ', end='')
+            cont_descis = input()
+            if cont_descis == 'N' or cont_descis == 'n':
+                return
         except AssertionError:
-            if not os.path.exists(path):
-                print('\nThe given path "' + path + '" does not exist.')
-            if n > len(line_list):
-                print(f'Opps.. The inserted number of test cases bigger than current number in the file - {len(line_list)}')
-            print('Would you like to try one more time? Y/N: ', end='')
-            contin = input()
-            if contin == 'N' or contin == 'n':
-                return
-        except ValueError:
-            print("Test cases number must be integer type !")
-            print('Would you like to try one more time? Y/N: ', end='')
-            contin = input()
-            if contin == 'N' or contin == 'n':
+            print('\nNo " *' + ext + ' " file has been found in the "' + path + '"')
+            print('Would you like to try one more time ? Y/N: ', end='')
+            cont_descis = input()
+            if cont_descis == 'N' or cont_descis == 'n':
                 return
 
 
-print(randomeTestCases())
+freashFileSearch()
