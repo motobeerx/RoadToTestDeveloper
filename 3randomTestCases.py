@@ -39,7 +39,7 @@ def randomeTestCases():
             elif  os.path.splitext(path)[1] != '.txt':
                 print(f'The given file extension is {os.path.splitext(path)[1]}, but should be .txt!')
             elif n > len(line_list):
-                print(f'Opps.. The inserted number of test cases bigger than current number in the file - {len(line_list)}')
+                print(f'Opps.. The inserted number of test cases bigger than current number in the file - {len(line_list) -1 }')
             print('Would you like to try one more time? Y/N: ', end='')
             contin = input()
             if contin == 'N' or contin == 'n':
