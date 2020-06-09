@@ -1,7 +1,8 @@
+from .pages.base_page import BasePage
 from .pages.product_page import ProductPage
 from .pages.basket_page import BasketPage
 from .pages.login_page import LoginPage
-from .pages.locators import LoginPageLocators, BasketPageLocators, BasePageLocators
+from .pages.locators import BasePageLocators
 from .pages.url import Url
 import pytest
 
@@ -16,6 +17,7 @@ class TestUserAddToBasketFromProductPage:
         page.register_new_user(page.get_fake_email(), page.get_fake_password())
         page.should_be_authorized_user()
 
+    @pytest.mark.need_review
     def test_user_can_add_product_to_basket(self, browser):
         page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
         page.open()
@@ -24,69 +26,67 @@ class TestUserAddToBasketFromProductPage:
         page.is_shipment_in_basket(*name_and_price)
 
     def test_user_cant_see_success_message(self, browser):
-        page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
-        page.open()
-        assert page.is_not_element_present(*BasketPageLocators.NAME_OF_ADDED_SHIPMENT), \
-            'Success message of adding in basket is presented'
+        product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
+        product_page.open()
+        product_page.is_not_success_message()
 
 
+@pytest.mark.need_review
 def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
-    page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
-    page.open()
-    page.go_to_link(*BasePageLocators.BASKET_LINK)
+    product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
+    product_page.open()
+    product_page.go_to_link(*BasePageLocators.BASKET_LINK)
     basket_page = BasketPage(browser, browser.current_url)
-    assert basket_page.is_basket_empty(), 'Basket is not empty'
+    basket_page.should_be_basket_empty()
 
 
-@pytest.mark.skip
 def test_guest_should_see_login_link_on_product_page(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
-    page = ProductPage(browser, link)
-    page.open()
-    page.should_be_login_link()
+    link = Url.PRODUCT_PAGE_URL
+    product_page = ProductPage(browser, link)
+    product_page.open()
+    product_page.should_be_login_link()
 
 
-@pytest.mark.skip
+@pytest.mark.need_review
 def test_guest_can_go_to_login_page_from_product_page(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
-    page = ProductPage(browser, link)
-    page.open()
-    page.go_to_link(*BasePageLocators.LOGIN_LINK)
-    assert page.is_element_present(*LoginPageLocators.REGISTER_FORM), 'Registration form is absent'
-    assert page.is_element_present(*LoginPageLocators.LOG_IN_FORM), 'Login form is absent'
+    link = Url.PRODUCT_PAGE_URL
+    product_page = ProductPage(browser, link)
+    product_page.open()
+    product_page.go_to_link(*BasePageLocators.LOGIN_LINK)
+    login_page = LoginPage(browser, browser.current_url)
+    login_page.should_be_login_page()
 
 
-@pytest.mark.skip
-@pytest.mark.parametrize('link', [f'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer{i}'
-                                  for i in range(1)])
+@pytest.mark.parametrize('link', BasePage.get_promo_offer_links(7))
+@pytest.mark.need_review
 def test_guest_can_add_product_to_basket(browser, link):
-    page = ProductPage(browser, link)
-    page.open()
-    name_and_price = (page.get_shipment_name(), page.get_shipment_price())
-    page.add_in_basket()
-    page.is_shipment_in_basket(*name_and_price)
+    product_page = ProductPage(browser, link)
+    product_page.open()
+    name_and_price = (product_page.get_shipment_name(), product_page.get_shipment_price())
+    product_page.add_in_basket()
+    product_page.solve_quiz_and_get_code()
+    product_page.is_shipment_in_basket(*name_and_price)
 
 
-@pytest.mark.skip
 @pytest.mark.xfail
 def test_guest_cant_see_success_message_after_adding_product_to_basket(browser):
-    page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
-    page.open()
-    page.add_in_basket()
-    assert page.is_not_element_present(*BasketPageLocators.NAME_OF_ADDED_SHIPMENT),\
-        'Success message of adding in basket is presented'
+    product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
+    product_page.open()
+    product_page.add_in_basket()
+    basket_page = BasketPage(browser, browser.current_url)
+    basket_page.should_not_be_success_messsage_after_added_shipment()
 
 
 def test_guest_cant_see_success_message(browser):
-    page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
-    page.open()
-    assert page.is_not_element_present(*BasketPageLocators.NAME_OF_ADDED_SHIPMENT), \
-        'Success message of adding in basket is presented'
+    product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
+    product_page.open()
+    product_page.should_not_be_success_message()
 
 
 @pytest.mark.xfail
 def test_message_disappeared_after_adding_product_to_basket(browser):
-    page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
-    page.open()
-    page.add_in_basket()
-    assert page.is_disappeared(*BasketPageLocators.NAME_OF_ADDED_SHIPMENT), 'Success message disappeared'
+    product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
+    product_page.open()
+    product_page.add_in_basket()
+    basket_page = BasketPage(browser, browser.current_url)
+    basket_page.message_should_disappear()
