@@ -28,7 +28,7 @@ class TestUserAddToBasketFromProductPage:
     def test_user_cant_see_success_message(self, browser):
         product_page = ProductPage(browser, Url.PRODUCT_PAGE_URL)
         product_page.open()
-        product_page.is_not_success_message()
+        product_page.should_not_be_success_message()
 
 
 @pytest.mark.need_review
